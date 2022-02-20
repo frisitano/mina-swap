@@ -15,6 +15,7 @@ export const sqrt = (y: UInt64): UInt64 => {
 
 const SQRT_ITERATIONS = 20;
 
+// babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
 const doSqrt = (y: UInt64): UInt64 => {
   let x = y.div(2).add(1);
   for (let i = 0; i < SQRT_ITERATIONS; i++) {
