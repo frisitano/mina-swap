@@ -1,9 +1,10 @@
-import { Signature } from 'snarkyjs';
+import { Circuit, Signature, UInt64 } from 'snarkyjs';
 import { Pairs } from '../models/pair';
 import { Mint } from '../models/liquidity';
 import { Accounts } from '../models/account';
 import { RollupProof } from '../index';
 import { StateTransition, State } from '../models/state';
+import { min, sqrt } from '../lib/math';
 
 export const mint = (
   sig: Signature,
