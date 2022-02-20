@@ -1,16 +1,19 @@
 import { Signature } from 'snarkyjs';
 import { Pairs } from '../models/pair';
-import { AddLiquidity } from '../models/liquidity';
+import { Mint } from '../models/liquidity';
 import { Accounts } from '../models/account';
+import { RollupProof } from '../index';
+import { StateTransition, State } from '../models/state';
 
-const addLiquidity = (
+export const mint = (
   sig: Signature,
-  data: AddLiquidity,
+  data: Mint,
   pairs: Pairs,
   accounts: Accounts
-) => {
+): RollupProof => {
   // verify sig
   sig.verify(data.sender, data.toFields()).assertEquals(true);
+  const originState = new State(accounts, pairs);
 
   // fetch pair
   let [pair, pairProof] = pairs.get(data.pairId);
@@ -23,5 +26,9 @@ const addLiquidity = (
   // fetch lp token balance
   let [lpTokenBalance, lpTokenBalanceProof] = account.value.balances.get(
     pair.value.lpTokenId
+  );
+
+  return new RollupProof(
+    new StateTransition(originState, new State(accounts, pairs))
   );
 };

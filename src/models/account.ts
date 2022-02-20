@@ -7,7 +7,7 @@ import {
   prop,
 } from 'snarkyjs';
 
-const balancesDepth: number = 32;
+const balancesDepth: number = 10; // 1024 balance capacity per account
 const balances = KeyedAccumulatorFactory<UInt32, UInt64>(balancesDepth);
 type Balances = InstanceType<typeof balances>;
 
@@ -24,6 +24,6 @@ class Account extends CircuitValue {
   }
 }
 
-const accountsDepth: number = 32;
+const accountsDepth: number = 24; // 16777216 account capacity
 const accounts = KeyedAccumulatorFactory<PublicKey, Account>(accountsDepth);
 export type Accounts = InstanceType<typeof accounts>;

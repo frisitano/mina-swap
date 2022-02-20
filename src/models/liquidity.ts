@@ -1,6 +1,6 @@
 import { CircuitValue, prop, PublicKey, UInt32, UInt64 } from 'snarkyjs';
 
-export class AddLiquidity extends CircuitValue {
+export class Mint extends CircuitValue {
   @prop sender: PublicKey;
   @prop pairId: UInt32;
   @prop amountToken0: UInt64;
@@ -26,7 +26,7 @@ export class AddLiquidity extends CircuitValue {
   }
 }
 
-export class RemoveLiquidity extends CircuitValue {
+export class Burn extends CircuitValue {
   @prop sender: PublicKey;
   @prop pairId: UInt32;
   @prop amountToken0Min: UInt64;

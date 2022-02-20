@@ -10,7 +10,7 @@ export const swap = (
   data: Swap,
   accounts: Accounts,
   pairs: Pairs
-) => {
+): RollupProof => {
   // verify signiture and construct origin state
   sig.verify(data.sender, data.toFields()).assertEquals(true);
   const originState = new State(accounts, pairs);

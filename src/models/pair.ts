@@ -35,6 +35,17 @@ class Pair extends CircuitValue {
   }
 }
 
-const pairsDepth: number = 32;
+const pairsDepth: number = 16; // 65536 pair capacity
 const pairs = KeyedAccumulatorFactory<UInt32, Pair>(pairsDepth);
 export type Pairs = InstanceType<typeof pairs>;
+
+class CreatePair extends CircuitValue {
+  @prop token0Id: UInt32;
+  @prop tokne1Id: UInt32;
+
+  constructor(token0Id: UInt32, token1Id: UInt32) {
+    super();
+    this.token0Id = token0Id;
+    this.tokne1Id = token1Id;
+  }
+}
