@@ -23,11 +23,3 @@ const doSqrt = (y: UInt64): UInt64 => {
   }
   return x;
 };
-
-Promise.resolve().then(async () => {
-  await isReady;
-  console.log(UInt64.MAXINT().toString());
-  console.log(UInt64.fromNumber(18446744073709551615).toString());
-  console.log(UInt64.fromNumber(184467440737095515).toString());
-  shutdown();
-});
