@@ -55,11 +55,13 @@ export const mint = (
     additionalLiqudity
   );
 
-  // update pair and account
+  // update pair
   pair.value.reserve0 = pair.value.reserve0.add(data.amountToken0);
   pair.value.reserve1 = pair.value.reserve1.add(data.amountToken1);
   pair.value.lpTotalAmount = pair.value.lpTotalAmount.add(liquidity);
   pairs.set(pairProof, pair.value);
+
+  // update account
   account.value.balances.set(
     lpTokenBalanceProof,
     Circuit.if(
