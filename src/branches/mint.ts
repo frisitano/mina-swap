@@ -2,16 +2,16 @@ import { Circuit, Signature, UInt64 } from 'snarkyjs';
 import { Pairs } from '../models/pair';
 import { Mint } from '../models/liquidity';
 import { Accounts } from '../models/account';
-import { RollupProof } from '../index';
+import { DEX } from '../dex';
 import { StateTransition, State } from '../models/state';
 import { min, sqrt } from '../lib/math';
 
 export const mint = (
   sig: Signature,
   data: Mint,
-  pairs: Pairs,
-  accounts: Accounts
-): RollupProof => {
+  accounts: Accounts,
+  pairs: Pairs
+): DEX => {
   // verify sig
   sig.verify(data.sender, data.toFields()).assertEquals(true);
   const originState = new State(accounts, pairs);
@@ -31,14 +31,14 @@ export const mint = (
   token0Balance.isSome.assertEquals(true);
   token0Balance.value.lt(data.amountToken0).assertEquals(false);
 
-  // assert sufficient token balance
+  // assert sufficient token1 balance
   let [token1Balance, token1Proof] = account.value.balances.get(
     pair.value.token1Id
   );
   token1Balance.isSome.assertEquals(true);
   token1Balance.value.lt(data.amountToken1).assertEquals(false);
 
-  // fetch lp token balance
+  // fetch account lpToken balance
   let [lpTokenBalance, lpTokenBalanceProof] = account.value.balances.get(
     pair.value.lpTokenId
   );
@@ -80,7 +80,5 @@ export const mint = (
   );
   accounts.set(accountProof, account.value);
 
-  return new RollupProof(
-    new StateTransition(originState, new State(accounts, pairs))
-  );
+  return new DEX(new StateTransition(originState, new State(accounts, pairs)));
 };

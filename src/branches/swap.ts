@@ -3,14 +3,14 @@ import { Accounts } from '../models/account';
 import { Pairs } from '../models/pair';
 import { State, StateTransition } from '../models/state';
 import { Swap } from '../models/swap';
-import { feeTo, RollupProof } from '../index';
+import { feeTo, DEX } from '../dex';
 
 export const swap = (
   sig: Signature,
   data: Swap,
   accounts: Accounts,
   pairs: Pairs
-): RollupProof => {
+): DEX => {
   // verify signiture and construct origin state
   sig.verify(data.sender, data.toFields()).assertEquals(true);
   const originState = new State(accounts, pairs);
@@ -81,7 +81,5 @@ export const swap = (
   pair.value.reserve1 = pair.value.reserve1.sub(amount);
   pairs.set(pairProof, pair.value);
 
-  return new RollupProof(
-    new StateTransition(originState, new State(accounts, pairs))
-  );
+  return new DEX(new StateTransition(originState, new State(accounts, pairs)));
 };

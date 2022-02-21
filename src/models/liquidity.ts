@@ -23,8 +23,6 @@ export class Mint extends CircuitValue {
 export class Burn extends CircuitValue {
   @prop sender: PublicKey;
   @prop pairId: UInt32;
-  @prop amountToken0Min: UInt64;
-  @prop amountToken1Min: UInt64;
   @prop amountLpToken: UInt64;
 
   constructor(
@@ -37,8 +35,6 @@ export class Burn extends CircuitValue {
     super();
     this.sender = sender;
     this.pairId = pairId;
-    this.amountToken0Min = amountToken0Min;
-    this.amountToken1Min = amountToken1Min;
     this.amountLpToken = amountLpToken;
   }
 }
