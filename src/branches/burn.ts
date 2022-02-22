@@ -1,19 +1,15 @@
 import { Signature } from 'snarkyjs';
-import { DEX } from '../dex';
-import { Accounts } from '../models/account';
+import { RollupProof } from '..';
 import { Burn } from '../models/liquidity';
-import { Pairs } from '../models/pair';
 import { State, StateTransition } from '../models/state';
 
-export const burn = (
-  sig: Signature,
-  data: Burn,
-  accounts: Accounts,
-  pairs: Pairs
-): DEX => {
+export const burn = (sig: Signature, data: Burn, state: State): RollupProof => {
+  // dump state
+  let accounts = state.accounts;
+  let pairs = state.pairs;
+
   // verify sig
   sig.verify(data.sender, data.toFields()).assertEquals(true);
-  const originState = new State(accounts, pairs);
 
   // fetch pair
   let [pair, pairProof] = pairs.get(data.pairId);
@@ -68,5 +64,7 @@ export const burn = (
   );
   accounts.set(accountProof, account.value);
 
-  return new DEX(new StateTransition(originState, new State(accounts, pairs)));
+  return new RollupProof(
+    new StateTransition(state, new State(accounts, pairs))
+  );
 };

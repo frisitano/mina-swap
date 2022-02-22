@@ -3,17 +3,15 @@ import { Accounts } from '../models/account';
 import { Pairs } from '../models/pair';
 import { State, StateTransition } from '../models/state';
 import { Swap } from '../models/swap';
-import { feeTo, DEX } from '../dex';
+import { feeTo, RollupProof } from '../index';
 
-export const swap = (
-  sig: Signature,
-  data: Swap,
-  accounts: Accounts,
-  pairs: Pairs
-): DEX => {
-  // verify signiture and construct origin state
+export const swap = (sig: Signature, data: Swap, state: State): RollupProof => {
+  // dump state
+  let accounts = state.accounts;
+  let pairs = state.pairs;
+
+  // verify signiture
   sig.verify(data.sender, data.toFields()).assertEquals(true);
-  const originState = new State(accounts, pairs);
 
   // fetch sender, assert account exists and nonce is correct
   let [sender, senderAccountProof] = accounts.get(data.sender);
@@ -81,5 +79,7 @@ export const swap = (
   pair.value.reserve1 = pair.value.reserve1.sub(amount);
   pairs.set(pairProof, pair.value);
 
-  return new DEX(new StateTransition(originState, new State(accounts, pairs)));
+  return new RollupProof(
+    new StateTransition(state, new State(accounts, pairs))
+  );
 };
