@@ -25,7 +25,7 @@ Due to the achitecture of this solution the system achieves the following proper
 
 ### Data Model
 
-Mina swap has core data structres that constitutes its state, these are:
+Mina swap has two core data structres that constitutes its state, these are:
 
 - Account merkle tree
 - Pair merkle tree
@@ -58,6 +58,32 @@ The table below illustrates the pair model.
 | reserve1      | UInt64 |
 | lpTokenId     | UInt32 |
 | lpTotalAmount | UInt64 |
+
+### Logic Overview
+
+Mina swap is a liqudity pool based constant product automated market maker decentralised exchange.
+That is to say that the liqudity pool satisfies the invariant
+
+```
+(x_1-0.003*x_in) * y_1 >= x_0*y_0
+```
+
+where `x_0`, `y_0` are the initial reserve balances of asset X and Y respsectively,
+`x_in` is the amount of asset X that the user would like to swap, `x_1` and `y_1`
+are the final reserve balances of asset X and Y respectively.
+
+### Branches
+
+Mina swap has three core branches / methods. These are:
+
+- swap
+- mint
+- burn
+
+#### Swap
+
+The swap branch allows users to swap one token for another. An industry standard 0.3% protocol fee is
+charged per swap. Of the 0.3%, liqudity providers receive 0.25% and the operator receives 0.05%.
 
 ## How to build
 
