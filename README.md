@@ -1,4 +1,4 @@
-# Mina Snapp
+# Mina Swap
 
 Mina swap is a ZK rollup based constant product AMM decentralised exchange.
 Mina swap provides a non-custodial, scalable platform for trustlessly
@@ -65,7 +65,7 @@ Mina swap is a liqudity pool based constant product automated market maker decen
 That is to say that the liqudity pool satisfies the invariant
 
 ```
-(x_1-0.003*x_in) * y_1 >= x_0*y_0
+(x_1 - 0.003*x_in) * y_1 >= x_0*y_0
 ```
 
 where `x_0`, `y_0` are the initial reserve balances of asset X and Y respsectively,
