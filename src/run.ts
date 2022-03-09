@@ -8,6 +8,7 @@ import {
   Signature,
   Field,
   array,
+  Poseidon,
 } from 'snarkyjs';
 import { KeyedMerkleStore } from './models/keyed_data_store';
 import { Account } from './models/account';
@@ -19,16 +20,17 @@ import { Mint } from './models/liquidity';
 const main = async () => {
   await isReady;
 
-  let accounts = new KeyedMerkleStore<PublicKey, Account>(Account.zero);
+  let accounts = new KeyedMerkleStore<string, Account>(Account.zero);
 
   const privateKey = PrivateKey.random();
   const publicKey = privateKey.toPublicKey();
+  const accountHash = Poseidon.hash(publicKey.toFields()).toString();
   const balances = new KeyedMerkleStore<string, UInt64>(UInt64.zero);
   balances.set('1', UInt64.fromNumber(10000));
   balances.set('2', UInt64.fromNumber(10000));
   const testAccount = new Account(publicKey, UInt32.zero, balances);
 
-  accounts.set(publicKey, testAccount);
+  accounts.set(accountHash, testAccount);
 
   let pairs = new KeyedMerkleStore<string, Pair>(Pair.zero);
   const testPair = new Pair(
@@ -54,7 +56,7 @@ const main = async () => {
   const result = mint(sig, mintPayload, state);
 
   const finalAccounts = result.accounts;
-  const finalAccount = finalAccounts.get(publicKey);
+  const finalAccount = finalAccounts.get(accountHash);
   const finalBalance = finalAccount.value.balances.get('1');
 
   console.log(`final balance: ${finalBalance.value.toString()}`);

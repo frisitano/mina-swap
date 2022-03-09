@@ -26,4 +26,4 @@ export class Account extends CircuitValue {
 }
 
 const accountsDepth: number = 24; // 16777216 account capacity
-export type Accounts = KeyedMerkleStore<PublicKey, Account>;
+export type Accounts = KeyedMerkleStore<string, Account>;

@@ -1,4 +1,4 @@
-import { Circuit, Signature, UInt64 } from 'snarkyjs';
+import { Circuit, Signature, UInt64, Poseidon } from 'snarkyjs';
 import { Mint } from '../models/liquidity';
 import { RollupProof } from '../rollup';
 import { StateTransition, State } from '../models/state';
@@ -17,7 +17,8 @@ export const mint = (sig: Signature, data: Mint, state: State): State => {
   pair.isSome.assertEquals(true);
 
   // fetch account
-  let account = accounts.get(data.sender);
+  const accountHash = Poseidon.hash(data.sender.toFields()).toString();
+  let account = accounts.get(accountHash);
   account.isSome.assertEquals(true);
 
   // assert sufficient token0 balance
@@ -75,7 +76,7 @@ export const mint = (sig: Signature, data: Mint, state: State): State => {
     pair.value.token1Id.toString(),
     token1Balance.value.sub(data.amountToken1)
   );
-  accounts.set(data.sender, account.value);
+  accounts.set(accountHash, account.value);
 
   return new State(accounts, pairs);
 };

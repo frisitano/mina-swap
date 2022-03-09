@@ -1,4 +1,4 @@
-import { Signature, Circuit } from 'snarkyjs';
+import { Signature, Circuit, Poseidon } from 'snarkyjs';
 import { Accounts } from '../models/account';
 import { Pairs } from '../models/pair';
 import { State, StateTransition } from '../models/state';
@@ -14,7 +14,8 @@ export const swap = (sig: Signature, data: Swap, state: State): State => {
   sig.verify(data.sender, data.toFields()).assertEquals(true);
 
   // fetch sender, assert account exists and nonce is correct
-  let account = accounts.get(data.sender);
+  const accountHash = Poseidon.hash(data.sender.toFields()).toString();
+  let account = accounts.get(accountHash);
   account.isSome.assertEquals(true);
   account.value.nonce.assertEquals(data.nonce);
 
@@ -31,7 +32,8 @@ export const swap = (sig: Signature, data: Swap, state: State): State => {
   senderToken0Balance.value.assertGt(data.amount); // change to Gte
 
   // fetch feeTo account and token0 balance
-  const feeToAccount = accounts.get(feeTo);
+  const feeToHash = Poseidon.hash(feeTo.toFields()).toString();
+  const feeToAccount = accounts.get(feeToHash);
   const feeToToken0Balance = feeToAccount.value.balances.get(
     data.token0Id.toString()
   );
@@ -74,8 +76,8 @@ export const swap = (sig: Signature, data: Swap, state: State): State => {
   );
 
   // update accounts
-  accounts.set(data.sender, account.value);
-  accounts.set(feeTo, feeToAccount.value);
+  accounts.set(accountHash, account.value);
+  accounts.set(feeToHash, feeToAccount.value);
 
   // update pair reserves
   pair.value.reserve0 = pair.value.reserve0.add(data.amount).sub(fee);
