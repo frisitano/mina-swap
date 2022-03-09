@@ -1,9 +1,9 @@
 import { Signature } from 'snarkyjs';
-import { RollupProof } from '..';
+import { RollupProof } from '../rollup';
 import { Burn } from '../models/liquidity';
 import { State, StateTransition } from '../models/state';
 
-export const burn = (sig: Signature, data: Burn, state: State): RollupProof => {
+export const burn = (sig: Signature, data: Burn, state: State): State => {
   // dump state
   let accounts = state.accounts;
   let pairs = state.pairs;
@@ -12,28 +12,28 @@ export const burn = (sig: Signature, data: Burn, state: State): RollupProof => {
   sig.verify(data.sender, data.toFields()).assertEquals(true);
 
   // fetch pair
-  let [pair, pairProof] = pairs.get(data.pairId);
+  let pair = pairs.get(data.pairId.toString());
   pair.isSome.assertEquals(true);
 
   // fetch account
-  let [account, accountProof] = accounts.get(data.sender);
+  let account = accounts.get(data.sender);
   account.isSome.assertEquals(true);
 
   // fetch account lpToken balance
-  let [lpTokenBalance, lpTokenBalanceProof] = account.value.balances.get(
-    pair.value.lpTokenId
+  let lpTokenBalance = account.value.balances.get(
+    pair.value.lpTokenId.toString()
   );
   lpTokenBalance.isSome.assertEquals(true);
   lpTokenBalance.value.lt(data.amountLpToken).assertEquals(false);
 
   // fetch token0 balance
-  let [token0Balance, token0Proof] = account.value.balances.get(
-    pair.value.token0Id
+  let token0Balance = account.value.balances.get(
+    pair.value.token0Id.toString()
   );
 
   // fetch sufficient token1 balance
-  let [token1Balance, token1Proof] = account.value.balances.get(
-    pair.value.token1Id
+  let token1Balance = account.value.balances.get(
+    pair.value.token1Id.toString()
   );
 
   const amountToken0 = data.amountLpToken
@@ -47,24 +47,22 @@ export const burn = (sig: Signature, data: Burn, state: State): RollupProof => {
   pair.value.reserve0 = pair.value.reserve0.sub(amountToken0);
   pair.value.reserve1 = pair.value.reserve1.sub(amountToken1);
   pair.value.lpTotalAmount = pair.value.lpTotalAmount.sub(data.amountLpToken);
-  pairs.set(pairProof, pair.value);
+  pairs.set(data.pairId.toString(), pair.value);
 
   // update account
   account.value.balances.set(
-    lpTokenBalanceProof,
+    pair.value.lpTokenId.toString(),
     lpTokenBalance.value.sub(data.amountLpToken)
   );
   account.value.balances.set(
-    token0Proof,
+    pair.value.token0Id.toString(),
     token0Balance.value.add(amountToken0)
   );
   account.value.balances.set(
-    token1Proof,
+    pair.value.token1Id.toString(),
     token1Balance.value.add(amountToken1)
   );
-  accounts.set(accountProof, account.value);
+  accounts.set(data.sender, account.value);
 
-  return new RollupProof(
-    new StateTransition(state, new State(accounts, pairs))
-  );
+  return new State(accounts, pairs);
 };

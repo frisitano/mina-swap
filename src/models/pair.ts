@@ -1,12 +1,7 @@
-import {
-  prop,
-  CircuitValue,
-  UInt64,
-  UInt32,
-  KeyedAccumulatorFactory,
-} from 'snarkyjs';
+import { prop, CircuitValue, UInt64, UInt32, Field } from 'snarkyjs';
+import { KeyedMerkleStore } from './keyed_data_store';
 
-class Pair extends CircuitValue {
+export class Pair extends CircuitValue {
   @prop pairId: UInt32;
   @prop token0Id: UInt32;
   @prop token1Id: UInt32;
@@ -33,11 +28,23 @@ class Pair extends CircuitValue {
     this.lpTokenId = lpTokenId;
     this.lpTotalAmount = lpTotalAmount;
   }
+
+  static get zero(): Pair {
+    return new Pair(
+      UInt32.zero,
+      UInt32.zero,
+      UInt32.zero,
+      UInt64.zero,
+      UInt64.zero,
+      UInt32.zero,
+      UInt64.zero
+    );
+  }
 }
 
 const pairsDepth: number = 16; // 65536 pair capacity
-const pairs = KeyedAccumulatorFactory<UInt32, Pair>(pairsDepth);
-export type Pairs = InstanceType<typeof pairs>;
+const pairs = new KeyedMerkleStore<string, Pair>(Pair.zero);
+export type Pairs = typeof pairs;
 
 class CreatePair extends CircuitValue {
   @prop token0Id: UInt32;
