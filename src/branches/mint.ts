@@ -1,4 +1,4 @@
-import { Circuit, Signature, UInt64, Poseidon } from 'snarkyjs';
+import { Circuit, Signature, UInt64, Poseidon, Field } from 'snarkyjs';
 import { Mint } from '../models/liquidity';
 import { RollupProof } from '../rollup';
 import { StateTransition, State } from '../models/state';
@@ -42,10 +42,11 @@ export const mint = (sig: Signature, data: Mint, state: State): State => {
 
   // compute liqudity
   const initialLiquidity = sqrt(data.amountToken0.mul(data.amountToken1)); // TODO do we need to add some liqudity to burn address
-  // const additionalLiqudity = min(
-  //   data.amountToken0.mul(pair.value.lpTotalAmount).div(pair.value.reserve0),
-  //   data.amountToken1.mul(pair.value.lpTotalAmount).div(pair.value.reserve1)
-  // );
+  // const reserve0 = Circuit.if(pair.value.reserve0.equals(UInt64.zero), new UInt64(new Field("1")), pair.value.reserve0);
+  // const reserve1 = Circuit.if(pair.value.reserve1.equals(UInt64.zero), new UInt64(new Field("1")), pair.value.reserve1);
+  // const token0Amount = data.amountToken0.mul(pair.value.lpTotalAmount).div(reserve0);
+  // const token1Amount = data.amountToken1.mul(pair.value.lpTotalAmount).div(reserve1);
+  // const additionalLiqudity = min(token0Amount, token1Amount);
   // const liquidity = Circuit.if(
   //   pair.value.lpTotalAmount.equals(UInt64.zero),
   //   initialLiquidity,

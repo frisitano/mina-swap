@@ -3,6 +3,7 @@ export default {
   verbose: true,
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
+  mapCoverage: true,
   globals: {
     'ts-jest': {
       useESM: true,
@@ -16,4 +17,5 @@ export default {
   transformIgnorePatterns: [
     '<rootDir>/node_modules/(?!snarkyjs/node_modules/tslib)',
   ],
+  modulePathIgnorePatterns: ['<rootDir>/build/'],
 };
