@@ -1,7 +1,6 @@
 import { Poseidon, Signature } from 'snarkyjs';
-import { RollupProof } from '../rollup';
 import { Burn } from '../models/liquidity';
-import { State, StateTransition } from '../models/state';
+import { State } from '../models/state';
 
 export const burn = (sig: Signature, data: Burn, state: State): State => {
   // dump state

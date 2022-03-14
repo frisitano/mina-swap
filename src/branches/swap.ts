@@ -1,9 +1,7 @@
 import { Signature, Circuit, Poseidon } from 'snarkyjs';
-import { Accounts } from '../models/account';
-import { Pairs } from '../models/pair';
-import { State, StateTransition } from '../models/state';
+import { State } from '../models/state';
 import { Swap } from '../models/swap';
-import { feeTo, RollupProof } from '../rollup';
+import { feeTo } from '../rollup';
 
 export const swap = (sig: Signature, data: Swap, state: State): State => {
   // dump state

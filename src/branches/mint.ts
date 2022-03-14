@@ -1,8 +1,7 @@
-import { Circuit, Signature, UInt64, Poseidon, Field } from 'snarkyjs';
+import { Circuit, Signature, Poseidon } from 'snarkyjs';
 import { Mint } from '../models/liquidity';
-import { RollupProof } from '../rollup';
-import { StateTransition, State } from '../models/state';
-import { min, sqrt } from '../lib/math';
+import { State } from '../models/state';
+import { sqrt } from '../lib/math';
 
 export const mint = (sig: Signature, data: Mint, state: State): State => {
   // dump state
