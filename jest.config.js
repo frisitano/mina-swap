@@ -3,7 +3,6 @@ export default {
   verbose: true,
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
-  mapCoverage: true,
   globals: {
     'ts-jest': {
       useESM: true,
