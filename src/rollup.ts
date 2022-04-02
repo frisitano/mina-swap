@@ -14,7 +14,8 @@ import { mint } from './branches/mint';
 import { burn } from './branches/burn';
 import { State } from './models/state';
 
-export const feeTo = PrivateKey.random().toPublicKey(); // mock for now
+//TODO CANT MOCK THIS ANYMORE!!
+// export const feeTo = PrivateKey.fromJSON().toPublicKey(); // mock for now
 
 @proofSystem
 export class RollupProof extends ProofWithInput<StateTransition> {

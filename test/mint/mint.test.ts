@@ -14,24 +14,26 @@ import { State } from '../../src/models/state';
 
 describe('mint implementation', () => {
   describe('foo()', () => {
-    beforeAll(async () => {
-      await isReady;
-    });
-    afterAll(async () => {
-      await shutdown();
-    });
+    // beforeAll(async () => {
+
+    // });
+    // afterAll(async () => {
+
+    // });
     it('should be correct', async () => {
-      // // instantiate composite strucutres
-      // const accounts = new KeyedMerkleStore<string, Account>(Account.zero);
+      await isReady;
+      // instantiate composite strucutres
+      const accounts = new KeyedMerkleStore<string, Account>(Account.zero);
       // const balances = new KeyedMerkleStore<string, UInt64>(UInt64.zero);
       // const pairs = new KeyedMerkleStore<string, Pair>(Pair.zero);
 
       // // instantiate test account
-      // const privateKey = PrivateKey.random();
-      // const publicKey = privateKey.toPublicKey();
-      // const accountHash = Poseidon.hash(publicKey.toFields()).toString();
-      // const token0Id = UInt32.fromNumber(1);
-      // const token1Id = UInt32.fromNumber(2);
+      let theMap = new Map<string, number>();
+      const privateKey = PrivateKey.random();
+      const publicKey = privateKey.toPublicKey();
+      const accountHash = Poseidon.hash(publicKey.toFields()).toString();
+      const token0Id = UInt32.fromNumber(1);
+      const token1Id = UInt32.fromNumber(2);
       // balances.set(token0Id.toString(), UInt64.fromNumber(10000));
       // balances.set(token1Id.toString(), UInt64.fromNumber(10000));
       // const testAccount = new Account(publicKey, UInt32.zero, balances);
@@ -59,6 +61,7 @@ describe('mint implementation', () => {
       // const amountToken2 = UInt64.fromNumber(5000);
       // const mint = new Mint(publicKey, pairId, amountToken1, amountToken2);
       expect(UInt32.zero).toEqual(UInt32.zero);
+      await shutdown();
     });
   });
 });

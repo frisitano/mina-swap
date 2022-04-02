@@ -1,5 +1,6 @@
 import { CircuitValue, prop, PublicKey, UInt32, UInt64 } from 'snarkyjs';
 
+//TODO ADD NONCE TO BOTH MINT AND BURN!!!
 export class Mint extends CircuitValue {
   @prop sender: PublicKey;
   @prop pairId: UInt32;
