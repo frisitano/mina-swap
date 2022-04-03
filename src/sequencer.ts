@@ -2,26 +2,20 @@ import {
   isReady,
   shutdown,
   UInt32,
-  PrivateKey,
   Poseidon,
   PublicKey,
   Field,
   UInt64,
   Signature,
 } from 'snarkyjs';
-import express, {
-  Express,
-  Response,
-  Request,
-  NextFunction,
-  response,
-} from 'express';
+import express, { Express, Response, Request, NextFunction } from 'express';
 import { getGenesis } from './utils';
 import { State } from './models/state';
-import { Mint } from './models/liquidity';
+import { Burn, Mint } from './models/liquidity';
 import { mint } from './branches/mint';
 import { swap } from './branches/swap';
 import { Swap } from './models/swap';
+import { burn } from './branches/burn';
 
 const testPrivateKey = {
   s: '18710778922576709649533144894202208408329193787102160558713073596186390059280',
@@ -42,31 +36,6 @@ const createApp = async (): Promise<Express> => {
   const genesis = getGenesis();
   app.set('state', genesis);
 
-  // const swapPayload = new Swap(
-  //   PublicKey.fromJSON(testPublicKey)!,
-  //   new UInt32(new Field('0')),
-  //   new UInt32(new Field('3')),
-  //   new UInt32(new Field('0')),
-  //   new UInt32(new Field('1')),
-  //   new UInt64(new Field('2000')),
-  //   new UInt64(new Field('0'))
-  // );
-  // const sig = Signature.create(
-  //   PrivateKey.fromJSON(testPrivateKey)!,
-  //   swapPayload.toFields()
-  // );
-  // console.log(sig.toJSON());
-
-  //   const swapPayload = new Swap(
-  //     PublicKey.fromJSON(testPublicKey)!,
-  //     new UInt32(new Field(pairId)),
-  //     new UInt32(new Field(token0Id)),
-  //     new UInt32(new Field(token1Id)),
-  //     new UInt64(new Field(amount)),
-  //     new UInt64(new Field(amountOutMin))
-  //   );
-  //   const sig = Signature.fromJSON(signature)!;
-
   // {
   //     "publicKey": {
   //         "g": {
@@ -85,11 +54,10 @@ const createApp = async (): Promise<Express> => {
     '/balance',
     async (req: Request, res: Response, next: NextFunction) => {
       // parse request
-      const serializedPublicKey = req.body.publicKey;
+      const publicKey = PublicKey.fromJSON(req.body.publicKey)!;
       const tokens: string[] = req.body.tokens;
 
       // compute account hash
-      const publicKey = PublicKey.fromJSON(serializedPublicKey)!;
       const accountHash = Poseidon.hash(publicKey.toFields()).toString();
 
       // get account
@@ -134,12 +102,11 @@ const createApp = async (): Promise<Express> => {
     '/faucet',
     async (req: Request, res: Response, next: NextFunction) => {
       // parse request
-      const serializedPublicKey = req.body.publicKey;
+      const publicKey = PublicKey.fromJSON(req.body.publicKey)!;
       const token = req.body.token;
-      const amount = req.body.amount;
+      const amount = new UInt64(new Field(req.body.amount));
 
       // compute account hash
-      const publicKey = PublicKey.fromJSON(serializedPublicKey)!;
       const accountHash = Poseidon.hash(publicKey.toFields()).toString();
 
       // get account
@@ -148,10 +115,7 @@ const createApp = async (): Promise<Express> => {
 
       // mint amount to token balance
       const balance = account.value.balances.get(token).value;
-      account.value.balances.set(
-        token,
-        balance.add(new UInt64(new Field(amount)))
-      );
+      account.value.balances.set(token, balance.add(amount));
 
       // update account
       state.accounts.set(accountHash, account.value);
@@ -177,21 +141,15 @@ const createApp = async (): Promise<Express> => {
   // }
   app.post('/mint', async (req: Request, res: Response, next: NextFunction) => {
     // parse request
-    const serializedPublicKey = req.body.publicKey;
-    const amountToken0 = req.body.amountToken0;
-    const amountToken1 = req.body.amountToken1;
-    const pairId = req.body.pairId;
-    const signature = req.body.sig;
+    const publicKey = PublicKey.fromJSON(req.body.publicKey)!;
+    const amountToken0 = new UInt64(new Field(req.body.amountToken0));
+    const amountToken1 = new UInt64(new Field(req.body.amountToken1));
+    const pairId = new UInt32(new Field(req.body.pairId));
+    const sig = Signature.fromJSON(req.body.sig)!;
 
     // process mint
     const state: State = app.get('state');
-    const mintPayload = new Mint(
-      PublicKey.fromJSON(serializedPublicKey)!,
-      new UInt32(new Field(pairId)),
-      new UInt64(new Field(amountToken0)),
-      new UInt64(new Field(amountToken1))
-    );
-    const sig = Signature.fromJSON(signature)!;
+    const mintPayload = new Mint(publicKey, pairId, amountToken0, amountToken1);
     const result = mint(sig, mintPayload, state);
 
     // update state
@@ -221,28 +179,67 @@ const createApp = async (): Promise<Express> => {
   app.post('/swap', async (req: Request, res: Response, next: NextFunction) => {
     try {
       // parse request
-      const serializedPublicKey = req.body.publicKey;
-      const amount = req.body.amount;
-      const amountOutMin = req.body.amountOutMin;
-      const token0Id = req.body.token0Id;
-      const token1Id = req.body.token1Id;
-      const pairId = req.body.pairId;
-      const nonce = req.body.nonce;
-      const signature = req.body.sig;
+      const publicKey = PublicKey.fromJSON(req.body.publicKey)!;
+      const amount = new UInt64(new Field(req.body.amount));
+      const amountOutMin = new UInt64(new Field(req.body.amountOutMin));
+      const token0Id = new UInt32(new Field(req.body.token0Id));
+      const token1Id = new UInt32(new Field(req.body.token1Id));
+      const pairId = new UInt32(new Field(req.body.pairId));
+      const nonce = new UInt32(new Field(req.body.nonce));
+      const sig = Signature.fromJSON(req.body.sig)!;
 
       // process swap
       const state: State = app.get('state');
       const swapPayload = new Swap(
+        publicKey,
+        nonce,
+        pairId,
+        token0Id,
+        token1Id,
+        amount,
+        amountOutMin
+      );
+      const result = swap(sig, swapPayload, state);
+
+      app.set('state', result);
+
+      res.send();
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  //   {
+  //     "publicKey": {
+  //         "g": {
+  //             "x": "18951473509293345537706798555233905552435801399059344108964509420770365419861",
+  //             "y": "24386449108643384504232497550899024016084967755111855853151450526402863349465"
+  //         }
+  //     },
+  //     "pairId": "3",
+  //     "amountLpToken": "1000",
+  //     "sig": {
+  //         "r": "11155592306234973032526206224576738611222214421136713999849998293816313874346",
+  //         "s": "3687187662026145344208465193528270345703089201860534423683933390783143271015"
+  //     }
+  // }
+  app.post('/burn', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // parse request
+      const serializedPublicKey = req.body.publicKey;
+      const pairId = req.body.pairId;
+      const amountLpToken = req.body.amountLpToken;
+      const signature = req.body.sig;
+
+      // process burn
+      const state: State = app.get('state');
+      const burnPayload = new Burn(
         PublicKey.fromJSON(serializedPublicKey)!,
-        new UInt32(new Field(nonce)),
         new UInt32(new Field(pairId)),
-        new UInt32(new Field(token0Id)),
-        new UInt32(new Field(token1Id)),
-        new UInt64(new Field(amount)),
-        new UInt64(new Field(amountOutMin))
+        new UInt64(new Field(amountLpToken))
       );
       const sig = Signature.fromJSON(signature)!;
-      const result = swap(sig, swapPayload, state);
+      const result = burn(sig, burnPayload, state);
 
       app.set('state', result);
 
@@ -259,7 +256,7 @@ Promise.resolve()
   .then(async () => {
     const app = await createApp();
     app.listen(8000, async () => {
-      console.log('Reef explorer API is running on port 8000.');
+      console.log('Sequencer API is running on port 8000.');
     });
   })
   .catch((e) => console.error(e));

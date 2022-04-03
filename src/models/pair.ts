@@ -42,9 +42,7 @@ export class Pair extends CircuitValue {
   }
 }
 
-const pairsDepth: number = 16; // 65536 pair capacity
-const pairs = new KeyedMerkleStore<string, Pair>(Pair.zero);
-export type Pairs = typeof pairs;
+export type Pairs = KeyedMerkleStore<string, Pair>;
 
 class CreatePair extends CircuitValue {
   @prop token0Id: UInt32;

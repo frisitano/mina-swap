@@ -26,13 +26,7 @@ export class Burn extends CircuitValue {
   @prop pairId: UInt32;
   @prop amountLpToken: UInt64;
 
-  constructor(
-    sender: PublicKey,
-    pairId: UInt32,
-    amountToken0Min: UInt64,
-    amountToken1Min: UInt64,
-    amountLpToken: UInt64
-  ) {
+  constructor(sender: PublicKey, pairId: UInt32, amountLpToken: UInt64) {
     super();
     this.sender = sender;
     this.pairId = pairId;

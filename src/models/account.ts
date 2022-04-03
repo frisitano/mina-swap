@@ -1,7 +1,6 @@
 import { PublicKey, CircuitValue, UInt32, UInt64, prop, Field } from 'snarkyjs';
 import { KeyedMerkleStore } from './keyed_data_store';
 
-const balancesDepth: number = 10; // 1024 balance capacity per account
 type Balances = KeyedMerkleStore<string, UInt64>;
 
 export class Account extends CircuitValue {
@@ -25,5 +24,4 @@ export class Account extends CircuitValue {
   }
 }
 
-const accountsDepth: number = 24; // 16777216 account capacity
 export type Accounts = KeyedMerkleStore<string, Account>;
